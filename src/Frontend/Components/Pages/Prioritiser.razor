@@ -29,9 +29,12 @@
                     <div class="card-header card-header-pastel-peach border-0">
                         <h5 class="card-title mb-0">🃏 Unranked Items</h5>
                     </div>
-                    <div class="card-body bg-light" 
+                    <div class="card-body bg-light @(_dragOverUnranked ? "drop-zone-active" : "")" 
                          ondragover="event.preventDefault();" 
-                         @ondrop="HandleDropToUnranked">
+                         @ondragenter="HandleDragEnterUnranked"
+                         @ondragleave="HandleDragLeaveUnranked"
+                         @ondrop="HandleDropToUnranked"
+                         @ondrop:stopPropagation="true">
                         @if (_unrankedItems.Count == 0)
                         {
                             <p class="text-muted text-center py-4">🎉 All items ranked! You're amazing! ✨</p>
@@ -41,9 +44,10 @@
                             <div class="list-group">
                                 @foreach (var item in _unrankedItems)
                                 {
-                                    <div class="list-group-item list-group-item-action mb-2 rounded border shadow-sm"
+                                    <div class="list-group-item list-group-item-action mb-2 rounded border shadow-sm @(_draggedItem == item ? "dragging" : "")"
                                          draggable="true"
-                                         @ondragstart="() => HandleDragStart(item)">
+                                         @ondragstart="() => HandleDragStart(item)"
+                                         @ondragend="HandleDragEnd">
                                         <div class="fw-bold">@item.Title</div>
                                         <small class="text-muted text-truncate d-block">@item.Description</small>
                                     </div>
@@ -59,13 +63,24 @@
                     <div class="card-header card-header-pastel-mint border-0">
                         <h5 class="card-title mb-0">🏆 Ordered List (High to Low Priority)</h5>
                     </div>
-                    <div class="card-body bg-light" 
+                    <div class="card-body bg-light @(_dragOverOrdered ? "drop-zone-active" : "")" 
                          ondragover="event.preventDefault();" 
-                         @ondrop="HandleDropToOrdered">
+                         @ondragenter="HandleDragEnterOrdered"
+                         @ondragleave="HandleDragLeaveOrdered"
+                         @ondrop="HandleDropToOrdered"
+                         @ondrop:stopPropagation="true">
                         @if (_orderedItems.Count == 0)
                         {
-                            <div class="text-center py-5 border-dashed rounded bg-white">
+                            <div class="text-center py-5 border-dashed rounded @(_dragOverOrdered && _draggedItem != null ? "drop-zone-empty-active" : "bg-white")"
+                                 @ondragenter="HandleDragEnterOrdered"
+                                 @ondragleave="HandleDragLeaveOrdered"
+                                 @ondragover:preventDefault="true"
+                                 @ondrop="HandleDropToOrdered">
                                 <p class="text-muted mb-0">👆 Drag items here to rank them</p>
+                                @if (_dragOverOrdered && _draggedItem != null)
+                                {
+                                    <p class="drop-preview-label mt-2 mb-0">📍 Drop to place <strong>@_draggedItem.Title</strong> at #1</p>
+                                }
                             </div>
                         }
                         else
@@ -75,9 +90,21 @@
                                 {
                                     var item = _orderedItems[i];
                                     var index = i;
-                                    <div class="list-group-item list-group-item-action mb-2 rounded border shadow-sm d-flex align-items-center"
+
+                                    @if (_dragOverIndex == index && _draggedItem != null && _draggedItem != item)
+                                    {
+                                        <div class="drop-placeholder mb-2 rounded d-flex align-items-center">
+                                            <span class="badge me-3 drop-placeholder-badge">@(index + 1)</span>
+                                            <div class="flex-grow-1 fw-bold text-truncate">@_draggedItem.Title</div>
+                                            <small class="drop-placeholder-hint ms-2">⬆ drops here</small>
+                                        </div>
+                                    }
+
+                                    <div class="list-group-item list-group-item-action mb-2 rounded border shadow-sm d-flex align-items-center @(_draggedItem == item ? "dragging" : "")"
                                          draggable="true"
                                          @ondragstart="() => HandleDragStart(item)"
+                                         @ondragend="HandleDragEnd"
+                                         @ondragenter="() => HandleDragEnterItem(index)"
                                          @ondrop:stopPropagation="true"
                                          @ondragover:preventDefault="true"
                                          @ondrop="() => HandleDropBetween(index)">
@@ -87,6 +114,26 @@
                                         </div>
                                     </div>
                                 }
+
+                                @* Drop zone + placeholder at the end of the list *@
+                                <div class="drop-zone-tail @(_dragOverIndex == _orderedItems.Count ? "drop-zone-tail-active" : "")"
+                                     @ondragenter="HandleDragEnterTail"
+                                     @ondragover:preventDefault="true"
+                                     @ondrop:stopPropagation="true"
+                                     @ondrop="() => HandleDropBetween(_orderedItems.Count)">
+                                    @if (_dragOverIndex == _orderedItems.Count && _draggedItem != null)
+                                    {
+                                        <div class="drop-placeholder rounded d-flex align-items-center">
+                                            <span class="badge me-3 drop-placeholder-badge">@(_orderedItems.Count + 1)</span>
+                                            <div class="flex-grow-1 fw-bold text-truncate">@_draggedItem.Title</div>
+                                            <small class="drop-placeholder-hint ms-2">⬆ drops here</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="drop-zone-tail-hint">+ drop at end</div>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
@@ -102,9 +149,69 @@
     }
     .list-group-item {
         cursor: grab;
+        transition: box-shadow 0.15s, opacity 0.15s, transform 0.1s;
     }
     .list-group-item:active {
         cursor: grabbing;
+    }
+    .dragging {
+        opacity: 0.35;
+        box-shadow: 0 0 0 3px #a78bca !important;
+        transform: scale(0.97);
+    }
+    .drop-zone-active {
+        background-color: #ede8f8 !important;
+        border: 2px dashed #a78bca !important;
+        border-radius: 0.75rem;
+    }
+    .drop-zone-empty-active {
+        background-color: #ede8f8 !important;
+        border: 2px dashed #a78bca !important;
+    }
+    .drop-preview-label {
+        font-size: 0.85rem;
+        color: #7b6fa0;
+    }
+    /* Ghost placeholder showing exactly where the item will land */
+    .drop-placeholder {
+        padding: 0.5rem 0.75rem;
+        background: linear-gradient(135deg, #ede8f8, #e8e0f5);
+        border: 2px dashed #a78bca;
+        animation: placeholder-pulse 0.8s ease-in-out infinite alternate;
+        min-height: 2.75rem;
+    }
+    .drop-placeholder-badge {
+        background: linear-gradient(135deg, #c5b8e8, #b8a8d8);
+        color: #3d2f5a;
+    }
+    .drop-placeholder-hint {
+        color: #a78bca;
+        font-style: italic;
+        white-space: nowrap;
+    }
+    @@keyframes placeholder-pulse {
+        from { box-shadow: 0 0 0 0 rgba(167,139,202,0.4); }
+        to   { box-shadow: 0 0 6px 4px rgba(167,139,202,0.25); }
+    }
+    /* Tail drop zone at the bottom of the ordered list */
+    .drop-zone-tail {
+        min-height: 2.25rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed transparent;
+        transition: border-color 0.15s, background 0.15s;
+        margin-top: 0.25rem;
+    }
+    .drop-zone-tail-active {
+        border-color: #a78bca;
+        background-color: #f5f0ff;
+    }
+    .drop-zone-tail-hint {
+        font-size: 0.75rem;
+        color: #c5b8e8;
+        pointer-events: none;
     }
 </style>
 
@@ -130,10 +237,31 @@
         _loading = false;
     }
 
+    private int _dragEnterCountUnranked;
+    private int _dragEnterCountOrdered;
+    private bool _dragOverUnranked => _dragEnterCountUnranked > 0;
+    private bool _dragOverOrdered => _dragEnterCountOrdered > 0;
+    private int? _dragOverIndex;
+
     private void HandleDragStart(BacklogItem item)
     {
         _draggedItem = item;
     }
+
+    private void HandleDragEnd()
+    {
+        _draggedItem = null;
+        _dragEnterCountUnranked = 0;
+        _dragEnterCountOrdered = 0;
+        _dragOverIndex = null;
+    }
+
+    private void HandleDragEnterUnranked() => _dragEnterCountUnranked++;
+    private void HandleDragLeaveUnranked() { if (--_dragEnterCountUnranked < 0) _dragEnterCountUnranked = 0; }
+    private void HandleDragEnterOrdered() => _dragEnterCountOrdered++;
+    private void HandleDragLeaveOrdered() { if (--_dragEnterCountOrdered < 0) _dragEnterCountOrdered = 0; }
+    private void HandleDragEnterItem(int index) => _dragOverIndex = index;
+    private void HandleDragEnterTail() => _dragOverIndex = _orderedItems.Count;
 
     private void HandleDropToUnranked()
     {
@@ -144,6 +272,7 @@
             _orderedItems.Remove(_draggedItem);
             _unrankedItems.Add(_draggedItem);
         }
+        _dragEnterCountUnranked = 0;
         _draggedItem = null;
     }
 
@@ -156,6 +285,7 @@
             _unrankedItems.Remove(_draggedItem);
             _orderedItems.Add(_draggedItem);
         }
+        _dragEnterCountOrdered = 0;
         _draggedItem = null;
     }
 
@@ -174,6 +304,8 @@
         {
             _orderedItems.Insert(targetIndex, _draggedItem);
         }
+        _dragOverIndex = null;
+        _dragEnterCountOrdered = 0;
         _draggedItem = null;
     }
 
