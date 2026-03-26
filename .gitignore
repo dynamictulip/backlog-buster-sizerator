@@ -1,0 +1,95 @@
+# ========================
+# .NET / C#
+# ========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.ncrunchsolution
+*.ncrunchproject
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/repositories.config
+*.nuspec
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# ========================
+# JetBrains Rider / IDE
+# ========================
+.idea/
+*.sln.iml
+_ReSharper*/
+*.DotSettings.user
+
+# Junie agent artifacts
+.junie/
+
+# ========================
+# OS
+# ========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+secrets.json
+appsettings.Local.json
+appsettings.*.Local.json
+
+# ========================
+# Test Results & Coverage
+# ========================
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# ========================
+# Publish / Deploy
+# ========================
+publish/
+*.pubxml
+*.pubxml.user
