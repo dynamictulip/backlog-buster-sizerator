@@ -31,6 +31,11 @@ Don't implement features that you haven't been asked to implement
 
 ## Development Workflow
 
+### Branching Model
+- Use a **branch** for each agent
+- **Merge requests** should be created from feature branches and reviewed by a team member before merging.
+- **Main** should be kept clean and stable.
+
 ### Atomic Commits
 - Each commit should represent a single, logical, and complete change.
 - Commit messages should be clear, concise, and descriptive.
