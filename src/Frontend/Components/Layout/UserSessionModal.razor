@@ -1,0 +1,82 @@
+@rendermode InteractiveServer
+@using Frontend.Services
+@inject UserSessionService UserSession
+@inject IJSRuntime JS
+@implements IDisposable
+
+@if (_showSetNameForm)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Welcome to Backlog Buster!</h5>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Enter your name to get started. This will be saved so you don't need to enter it again.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Your Name</label>
+                        <input class="form-control" @bind="_pendingName" placeholder="Enter your name" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @if (!string.IsNullOrWhiteSpace(UserSession.UserName))
+                    {
+                        <button class="btn btn-secondary" @onclick="HideNameForm">Cancel</button>
+                    }
+                    <button class="btn btn-primary" @onclick="SaveName">Save Name</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _showSetNameForm;
+    private string _pendingName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        UserSession.OnShowNamePromptRequested += HandleNamePromptRequested;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var stored = await JS.InvokeAsync<string?>("localStorage.getItem", "backlogbuster_username");
+            if (!string.IsNullOrWhiteSpace(stored))
+            {
+                UserSession.UserName = stored;
+            }
+            else
+            {
+                _pendingName = string.Empty;
+                _showSetNameForm = true;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void HandleNamePromptRequested()
+    {
+        _pendingName = UserSession.UserName ?? string.Empty;
+        _showSetNameForm = true;
+        StateHasChanged();
+    }
+
+    private void HideNameForm() => _showSetNameForm = false;
+
+    private async Task SaveName()
+    {
+        if (string.IsNullOrWhiteSpace(_pendingName)) return;
+        UserSession.UserName = _pendingName.Trim();
+        await JS.InvokeVoidAsync("localStorage.setItem", "backlogbuster_username", UserSession.UserName);
+        _showSetNameForm = false;
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnShowNamePromptRequested -= HandleNamePromptRequested;
+    }
+}

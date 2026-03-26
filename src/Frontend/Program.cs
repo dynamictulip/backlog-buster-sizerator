@@ -1,5 +1,6 @@
 using Frontend.Clients;
 using Frontend.Components;
+using Frontend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<BacklogClient>(client =>
     client.BaseAddress = new Uri("http://sizing-service"));
+builder.Services.AddScoped<UserSessionService>();
 
 var app = builder.Build();
 

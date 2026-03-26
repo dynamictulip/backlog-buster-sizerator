@@ -37,6 +37,12 @@ Don't go off the rails - do what you are told to do and no more
 - **Merge requests** should be created from feature branches and reviewed by a team member before merging.
 - **Main** should be kept clean and stable.
 
+### Test-Driven Development (TDD)
+- Write tests **before** writing implementation code.
+- Follow the Red-Green-Refactor cycle: write a failing test, make it pass, then refactor.
+- All new features and bug fixes must be covered by tests.
+- Run all tests before every commit and ensure they all pass before committing.
+
 ### Atomic Commits
 - Each commit should represent a single, logical, and complete change.
 - Commit messages should be clear, concise, and descriptive.

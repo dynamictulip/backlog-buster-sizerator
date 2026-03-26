@@ -45,6 +45,11 @@ backlog.MapPatch("/{id:guid}/size", (Guid id, SizeRequest request, IBacklogRepos
     .WithName("SizeBacklogItem")
     .WithSummary("Apply story points and priority to a backlog item");
 
+backlog.MapPost("/{id:guid}/rankings", (Guid id, UserRanking ranking, IBacklogRepository repo) =>
+    repo.AddRanking(id, ranking) is { } ranked ? Results.Ok(ranked) : Results.NotFound())
+    .WithName("AddRanking")
+    .WithSummary("Submit a user ranking for a backlog item");
+
 backlog.MapDelete("/{id:guid}", (Guid id, IBacklogRepository repo) =>
     repo.Delete(id) ? Results.NoContent() : Results.NotFound())
     .WithName("DeleteBacklogItem")

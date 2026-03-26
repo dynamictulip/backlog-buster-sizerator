@@ -10,6 +10,7 @@ public interface IBacklogRepository
     BacklogItem Add(BacklogItem item);
     BacklogItem? Update(Guid id, BacklogItem updated);
     BacklogItem? ApplySize(Guid id, SizeRequest request);
+    BacklogItem? AddRanking(Guid id, UserRanking ranking);
     bool Delete(Guid id);
 }
 
@@ -62,6 +63,17 @@ public class InMemoryBacklogRepository : IBacklogRepository
 
         item.StoryPoints = request.StoryPoints;
         item.Priority = request.Priority;
+        item.UpdatedAt = DateTimeOffset.UtcNow;
+        return item;
+    }
+
+    public BacklogItem? AddRanking(Guid id, UserRanking ranking)
+    {
+        if (!_items.TryGetValue(id, out var item))
+            return null;
+
+        item.Rankings.RemoveAll(r => r.UserName == ranking.UserName);
+        item.Rankings.Add(ranking);
         item.UpdatedAt = DateTimeOffset.UtcNow;
         return item;
     }
