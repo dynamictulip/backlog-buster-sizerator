@@ -8,8 +8,8 @@
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2 mb-0">📋 Backlog</h1>
-        <button class="btn btn-primary" @onclick="ShowAddForm">+ Add Item</button>
+        <h1 class="h2 mb-0">🗂️ Backlog</h1>
+        <button class="btn btn-primary" @onclick="ShowAddForm">✨ Add Item</button>
     </div>
 
     @if (_loading)
@@ -22,19 +22,19 @@
     }
     else if (_items.Count == 0)
     {
-        <div class="alert alert-info">No backlog items yet. Add your first item!</div>
+        <div class="alert alert-info">🌱 No backlog items yet. Add your first item!</div>
     }
     else
     {
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead class="table-dark">
+                <thead class="table-head-pastel">
                     <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Story Points</th>
-                        <th>Priority</th>
-                        <th>Actions</th>
+                        <th>📝 Title</th>
+                        <th>💬 Description</th>
+                        <th>🎯 Story Points</th>
+                        <th>🏷️ Priority</th>
+                        <th>⚙️ Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,8 +71,8 @@
     <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Backlog Item</h5>
+                <div class="modal-header card-header-pastel-purple">
+                    <h5 class="modal-title">✨ Add Backlog Item</h5>
                     <button type="button" class="btn-close" @onclick="HideForms"></button>
                 </div>
                 <div class="modal-body">
@@ -99,8 +99,8 @@
     <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Size: @_sizingItem.Title</h5>
+                <div class="modal-header card-header-pastel-mint">
+                    <h5 class="modal-title">🎯 Size: @_sizingItem.Title</h5>
                     <button type="button" class="btn-close" @onclick="HideForms"></button>
                 </div>
                 <div class="modal-body">

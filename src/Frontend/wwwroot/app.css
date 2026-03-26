@@ -1,19 +1,71 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #fdf6ff;
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: #7b6fa0;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #a78bca;
+    border-color: #9a7dbf;
+    border-radius: 1.5rem;
+}
+
+.btn-primary:hover {
+    background-color: #9a7dbf;
+    border-color: #8d70b4;
+}
+
+.btn {
+    border-radius: 1.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 0.75rem;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.card-header-pastel-purple {
+    background: linear-gradient(135deg, #c5b8e8, #b8a8d8);
+    color: #3d2f5a;
+}
+
+.card-header-pastel-pink {
+    background: linear-gradient(135deg, #f7c5d5, #f0afc5);
+    color: #5a2a3a;
+}
+
+.card-header-pastel-mint {
+    background: linear-gradient(135deg, #b8e8d4, #9fd8c0);
+    color: #1a4a36;
+}
+
+.card-header-pastel-peach {
+    background: linear-gradient(135deg, #ffd8b8, #ffc8a0);
+    color: #5a3010;
+}
+
+.card-pastel-purple {
+    background-color: #f5f0ff;
+}
+
+.card-pastel-pink {
+    background-color: #fff0f5;
+}
+
+.table-head-pastel {
+    background: linear-gradient(135deg, #c5b8e8, #d5c8f0);
+    color: #3d2f5a;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #c9b8e8;
 }
 
 .content {
