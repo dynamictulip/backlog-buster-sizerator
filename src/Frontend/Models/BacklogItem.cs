@@ -9,9 +9,14 @@ public class BacklogItem
     public Priority Priority { get; set; } = Priority.Unset;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
+    public List<UserRanking> Rankings { get; set; } = [];
+    public double? AverageStoryPoints { get; set; }
+    public double? AveragePriority { get; set; }
 }
 
 public record SizeRequest(int? StoryPoints, Priority Priority);
+
+public record UserRanking(string UserName, int? StoryPoints, Priority Priority);
 
 public enum Priority
 {
