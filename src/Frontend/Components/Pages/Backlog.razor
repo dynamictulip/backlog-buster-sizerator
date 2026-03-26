@@ -1,0 +1,211 @@
+@page "/backlog"
+@rendermode InteractiveServer
+@using Frontend.Clients
+@using Frontend.Models
+@inject BacklogClient BacklogClient
+
+<PageTitle>Backlog Buster - Backlog</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">📋 Backlog</h1>
+        <button class="btn btn-primary" @onclick="ShowAddForm">+ Add Item</button>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (_items.Count == 0)
+    {
+        <div class="alert alert-info">No backlog items yet. Add your first item!</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Story Points</th>
+                        <th>Priority</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _items)
+                    {
+                        <tr>
+                            <td><strong>@item.Title</strong></td>
+                            <td class="text-muted">@item.Description</td>
+                            <td>
+                                @if (item.StoryPoints.HasValue)
+                                {
+                                    <span class="badge bg-secondary">@item.StoryPoints SP</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td><span class="badge @PriorityBadgeClass(item.Priority)">@item.Priority</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowSizeForm(item)">Size</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteItem(item.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (_showAddForm)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Backlog Item</h5>
+                    <button type="button" class="btn-close" @onclick="HideForms"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input class="form-control" @bind="_newItem.Title" placeholder="Item title" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" @bind="_newItem.Description" rows="3" placeholder="Describe the item"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideForms">Cancel</button>
+                    <button class="btn btn-primary" @onclick="AddItem">Add Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_showSizeForm && _sizingItem is not null)
+{
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Size: @_sizingItem.Title</h5>
+                    <button type="button" class="btn-close" @onclick="HideForms"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Story Points</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var pts in new[] { 1, 2, 3, 5, 8, 13, 21 })
+                            {
+                                <button class="btn @(_selectedPoints == pts ? "btn-primary" : "btn-outline-primary")"
+                                        @onclick="() => _selectedPoints = pts">
+                                    @pts
+                                </button>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" @bind="_selectedPriority">
+                            @foreach (var p in Enum.GetValues<Priority>())
+                            {
+                                <option value="@p">@p</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideForms">Cancel</button>
+                    <button class="btn btn-primary" @onclick="ApplySize">Apply Size</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<BacklogItem> _items = [];
+    private bool _loading = true;
+    private bool _showAddForm;
+    private bool _showSizeForm;
+    private BacklogItem _newItem = new();
+    private BacklogItem? _sizingItem;
+    private int? _selectedPoints;
+    private Priority _selectedPriority = Priority.Unset;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadItems();
+    }
+
+    private async Task LoadItems()
+    {
+        _loading = true;
+        _items = await BacklogClient.GetAllAsync();
+        _loading = false;
+    }
+
+    private void ShowAddForm()
+    {
+        _newItem = new BacklogItem();
+        _showAddForm = true;
+    }
+
+    private void ShowSizeForm(BacklogItem item)
+    {
+        _sizingItem = item;
+        _selectedPoints = item.StoryPoints;
+        _selectedPriority = item.Priority;
+        _showSizeForm = true;
+    }
+
+    private void HideForms()
+    {
+        _showAddForm = false;
+        _showSizeForm = false;
+        _sizingItem = null;
+    }
+
+    private async Task AddItem()
+    {
+        if (string.IsNullOrWhiteSpace(_newItem.Title)) return;
+        await BacklogClient.CreateAsync(_newItem);
+        HideForms();
+        await LoadItems();
+    }
+
+    private async Task ApplySize()
+    {
+        if (_sizingItem is null) return;
+        await BacklogClient.ApplySizeAsync(_sizingItem.Id, new SizeRequest(_selectedPoints, _selectedPriority));
+        HideForms();
+        await LoadItems();
+    }
+
+    private async Task DeleteItem(Guid id)
+    {
+        await BacklogClient.DeleteAsync(id);
+        await LoadItems();
+    }
+
+    private static string PriorityBadgeClass(Priority priority) => priority switch
+    {
+        Priority.Critical => "bg-danger",
+        Priority.High => "bg-warning text-dark",
+        Priority.Medium => "bg-info text-dark",
+        Priority.Low => "bg-success",
+        _ => "bg-secondary"
+    };
+}
