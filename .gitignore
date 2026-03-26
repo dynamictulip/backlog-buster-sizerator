@@ -15,6 +15,8 @@ project.fragment.lock.json
 artifacts/
 # **/Properties/launchSettings.json
 !src/AppHost/Properties/launchSettings.json
+!src/Frontend/Properties/launchSettings.json
+!src/SizingService/Properties/launchSettings.json
 
 # NuGet
 *.nupkg
