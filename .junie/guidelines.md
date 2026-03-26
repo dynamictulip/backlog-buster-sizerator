@@ -2,6 +2,8 @@
 
 ## Core Principles
 
+Don't implement features that you haven't been asked to implement
+
 ### YAGNI (You Ain't Gonna Need It)
 - Implement only what is necessary for the current requirement.
 - Avoid over-engineering or building features for "future use" until they are actually needed.
@@ -28,10 +30,6 @@
 - Follow WCAG guidelines (e.g., proper ARIA attributes, semantic HTML, keyboard navigation, color contrast).
 
 ## Development Workflow
-
-### Test Everything
-- Every new feature or bug fix must include corresponding tests.
-- Ensure all tests pass before proposing any changes.
 
 ### Atomic Commits
 - Each commit should represent a single, logical, and complete change.
