@@ -3,6 +3,7 @@
 ## Core Principles
 
 Don't implement features that you haven't been asked to implement
+Don't go off the rails - do what you are told to do and no more
 
 ### YAGNI (You Ain't Gonna Need It)
 - Implement only what is necessary for the current requirement.
