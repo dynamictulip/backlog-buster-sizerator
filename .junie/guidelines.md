@@ -35,6 +35,8 @@ Don't implement features that you haven't been asked to implement
 - Each commit should represent a single, logical, and complete change.
 - Commit messages should be clear, concise, and descriptive.
 - Avoid "mega-commits" that mix unrelated changes.
+- Commit early and often.
+- Add untracked files to the commit.
 - **Automatic Commits:** All project changes must be committed immediately upon completion without prompting for user confirmation.
 
 ### Code Style
