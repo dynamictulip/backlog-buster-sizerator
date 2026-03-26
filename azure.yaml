@@ -1,4 +1,4 @@
-name: backlog-buster-sizerator
+name: backlog-buster-prioritiser
 services:
   app:
     project: src/AppHost/AppHost.csproj

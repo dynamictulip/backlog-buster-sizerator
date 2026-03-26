@@ -262,7 +262,6 @@
     private void HandleDragLeaveOrdered() { if (--_dragEnterCountOrdered < 0) _dragEnterCountOrdered = 0; }
     private void HandleDragEnterItem(int index) => _dragOverIndex = index;
     private void HandleDragEnterTail() => _dragOverIndex = _orderedItems.Count;
-
     private void HandleDropToUnranked()
     {
         if (_draggedItem == null) return;
