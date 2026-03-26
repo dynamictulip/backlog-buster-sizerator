@@ -1,0 +1,5 @@
+name: backlog-buster-sizerator
+services:
+  app:
+    project: src/AppHost/AppHost.csproj
+    host: containerapp
