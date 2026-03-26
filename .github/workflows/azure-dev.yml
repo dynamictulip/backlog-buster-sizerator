@@ -27,8 +27,14 @@ jobs:
       - name: Install azd
         run: curl -fsSL https://aka.ms/install-azd.sh | bash
 
+      - name: Check Azure credentials
+        run: |
+          if [ -z "$AZURE_CLIENT_ID" ] || [ -z "$AZURE_TENANT_ID" ] || [ -z "$AZURE_SUBSCRIPTION_ID" ] || [ -z "$AZURE_ENV_NAME" ] || [ -z "$AZURE_LOCATION" ]; then
+            echo "ERROR: Required Azure credentials/configuration are not set."
+            exit 1
+          fi
+
       - name: Log in with Azure (Federated Credentials)
-        if: ${{ env.AZURE_CLIENT_ID != '' }}
         run: |
           azd auth login \
             --client-id "$AZURE_CLIENT_ID" \
