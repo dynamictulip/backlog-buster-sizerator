@@ -9,14 +9,14 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #a78bca;
-    border-color: #9a7dbf;
+    background-color: #7c5aa0;
+    border-color: #6d4e8c;
     border-radius: 1.5rem;
 }
 
 .btn-primary:hover {
-    background-color: #9a7dbf;
-    border-color: #8d70b4;
+    background-color: #6d4e8c;
+    border-color: #5e4278;
 }
 
 .btn {

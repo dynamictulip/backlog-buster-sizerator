@@ -1,5 +1,4 @@
 @page "/backlog"
-@rendermode InteractiveServer
 @using Frontend.Clients
 @using Frontend.Models
 @inject BacklogClient BacklogClient
@@ -19,6 +18,10 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
+    }
+    else if (_loadError is not null)
+    {
+        <div class="alert alert-danger" role="alert">⚠️ @_loadError</div>
     }
     else if (_items.Count == 0)
     {
@@ -138,6 +141,7 @@
 @code {
     private List<BacklogItem> _items = [];
     private bool _loading = true;
+    private string? _loadError;
     private bool _showAddForm;
     private bool _showSizeForm;
     private BacklogItem _newItem = new();
@@ -153,7 +157,15 @@
     private async Task LoadItems()
     {
         _loading = true;
-        _items = await BacklogClient.GetAllAsync();
+        _loadError = null;
+        try
+        {
+            _items = await BacklogClient.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            _loadError = "Unable to load backlog items. Please try again later.";
+        }
         _loading = false;
     }
 
