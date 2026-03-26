@@ -13,7 +13,8 @@ obj/
 project.lock.json
 project.fragment.lock.json
 artifacts/
-**/Properties/launchSettings.json
+# **/Properties/launchSettings.json
+!src/AppHost/Properties/launchSettings.json
 
 # NuGet
 *.nupkg
