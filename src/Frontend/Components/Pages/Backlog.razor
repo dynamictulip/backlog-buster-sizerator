@@ -33,11 +33,12 @@
             <table class="table table-hover align-middle">
                 <thead class="table-head-pastel">
                     <tr>
-                        <th>📝 Title</th>
-                        <th>💬 Description</th>
-                        <th>🎯 Story Points</th>
-                        <th>🏷️ Priority</th>
-                        <th>⚙️ Actions</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Avg Story Points</th>
+                        <th>Avg Priority</th>
+                        <th>Rankings</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,18 +48,37 @@
                             <td><strong>@item.Title</strong></td>
                             <td class="text-muted">@item.Description</td>
                             <td>
-                                @if (item.StoryPoints.HasValue)
+                                @if (item.AverageStoryPoints.HasValue)
                                 {
-                                    <span class="badge bg-secondary">@item.StoryPoints SP</span>
+                                    <span class="badge bg-secondary">@item.AverageStoryPoints.Value.ToString("0.#") SP</span>
                                 }
                                 else
                                 {
                                     <span class="text-muted">—</span>
                                 }
                             </td>
-                            <td><span class="badge @PriorityBadgeClass(item.Priority)">@item.Priority</span></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowSizeForm(item)">Size</button>
+                                @if (item.AveragePriority.HasValue)
+                                {
+                                    <span class="badge @AveragePriorityBadgeClass(item.AveragePriority.Value)">@AveragePriorityLabel(item.AveragePriority.Value)</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Rankings.Count > 0)
+                                {
+                                    <span class="text-muted small">@string.Join(", ", item.Rankings.Select(r => r.UserName))</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => ShowRankForm(item)">Rank</button>
                                 <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteItem(item.Id)">Delete</button>
                             </td>
                         </tr>
@@ -97,16 +117,20 @@
     </div>
 }
 
-@if (_showSizeForm && _sizingItem is not null)
+@if (_showRankForm && _rankingItem is not null)
 {
     <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header card-header-pastel-mint">
-                    <h5 class="modal-title">🎯 Size: @_sizingItem.Title</h5>
+                    <h5 class="modal-title">Rank: @_rankingItem.Title</h5>
                     <button type="button" class="btn-close" @onclick="HideForms"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Your Name</label>
+                        <input class="form-control" @bind="_rankUserName" placeholder="Enter your name" />
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Story Points</label>
                         <div class="d-flex flex-wrap gap-2">
@@ -131,7 +155,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="HideForms">Cancel</button>
-                    <button class="btn btn-primary" @onclick="ApplySize">Apply Size</button>
+                    <button class="btn btn-primary" @onclick="SubmitRanking">Submit Ranking</button>
                 </div>
             </div>
         </div>
@@ -143,9 +167,10 @@
     private bool _loading = true;
     private string? _loadError;
     private bool _showAddForm;
-    private bool _showSizeForm;
+    private bool _showRankForm;
     private BacklogItem _newItem = new();
-    private BacklogItem? _sizingItem;
+    private BacklogItem? _rankingItem;
+    private string _rankUserName = string.Empty;
     private int? _selectedPoints;
     private Priority _selectedPriority = Priority.Unset;
 
@@ -175,19 +200,20 @@
         _showAddForm = true;
     }
 
-    private void ShowSizeForm(BacklogItem item)
+    private void ShowRankForm(BacklogItem item)
     {
-        _sizingItem = item;
-        _selectedPoints = item.StoryPoints;
-        _selectedPriority = item.Priority;
-        _showSizeForm = true;
+        _rankingItem = item;
+        _selectedPoints = null;
+        _selectedPriority = Priority.Unset;
+        _rankUserName = string.Empty;
+        _showRankForm = true;
     }
 
     private void HideForms()
     {
         _showAddForm = false;
-        _showSizeForm = false;
-        _sizingItem = null;
+        _showRankForm = false;
+        _rankingItem = null;
     }
 
     private async Task AddItem()
@@ -198,10 +224,10 @@
         await LoadItems();
     }
 
-    private async Task ApplySize()
+    private async Task SubmitRanking()
     {
-        if (_sizingItem is null) return;
-        await BacklogClient.ApplySizeAsync(_sizingItem.Id, new SizeRequest(_selectedPoints, _selectedPriority));
+        if (_rankingItem is null || string.IsNullOrWhiteSpace(_rankUserName)) return;
+        await BacklogClient.AddRankingAsync(_rankingItem.Id, new UserRanking(_rankUserName.Trim(), _selectedPoints, _selectedPriority));
         HideForms();
         await LoadItems();
     }
@@ -212,7 +238,7 @@
         await LoadItems();
     }
 
-    private static string PriorityBadgeClass(Priority priority) => priority switch
+    private static string AveragePriorityBadgeClass(double avg) => (Priority)Math.Round(avg) switch
     {
         Priority.Critical => "bg-danger",
         Priority.High => "bg-warning text-dark",
@@ -220,4 +246,7 @@
         Priority.Low => "bg-success",
         _ => "bg-secondary"
     };
+
+    private static string AveragePriorityLabel(double avg) =>
+        ((Priority)Math.Round(avg)).ToString();
 }
