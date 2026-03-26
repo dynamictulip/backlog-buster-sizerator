@@ -2,4 +2,5 @@ name: backlog-buster-sizerator
 services:
   app:
     project: src/AppHost/AppHost.csproj
+    language: dotnet
     host: containerapp
