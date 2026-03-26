@@ -34,6 +34,14 @@ public class BacklogClient(HttpClient httpClient)
             : null;
     }
 
+    public async Task<BacklogItem?> AddRankingAsync(Guid id, UserRanking ranking)
+    {
+        var response = await httpClient.PostAsJsonAsync($"/api/backlog/{id}/rankings", ranking);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<BacklogItem>()
+            : null;
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var response = await httpClient.DeleteAsync($"/api/backlog/{id}");
